@@ -1,0 +1,24 @@
+Laudromat Dev test
+You just started working for a startup that has a great new idea, think of it as “the Uber” of laundromats. The task is to build out a schedule system for the laundromat to help schedule times for users to drop off and pick up their laundry. There are a few system constraints that you should be aware of when design, building, and testing this system: 
+
+There are 10 washing machines. Doing a load of laundry takes 2 hours.
+There are 7 driers. Drying a load of laundry takes 1 hour.
+This proof of concept is built around a single, 24 hour day.
+
+The contract which the application must follow is as such: 
+
+// Struct like object that contains startHour (from 0-23) and endHour (3-26) as the minimum time for a load of laundry is 3 hours. 
+class Availability { 
+     public int startHour; 
+     public int endHour; 
+} 
+
+// Returns an array of availability structs. 
+Array<Availability> schedule(int numberOfLoads); 
+
+// Returns whether or not the time was booked. 
+bool register(Availability timeSlot); 
+
+This will be a standalone application that can be written in Java, Javascript, or Python (if you wish to do another language, let us know and we can probably entertain it). Please stick to standard classes of the language, avoid dependencies on things like databases (storing data structures as globals/singletons is fine for this exercise). We are looking for good application design and implementation. A working application is valued over the most efficient algorithms. We recognize there are numerous “right” answers and we will not be evaluating the code in terms of exactly the right output as our test harness. We will be evaluating the quality of the design, code, and output. 
+
+Please include a README describing your thought process and how to integrate the application into our test runner.  Please provide source and readme in a single zipped file within 48 hours of receiving this test.
