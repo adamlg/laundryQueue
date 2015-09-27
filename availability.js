@@ -4,82 +4,45 @@ function Availability(startHour,endHour){
 	this.endHour = endHour
 }
 
-//return an array of availability structures, probably for user to choose multiple start and end times
+//returns an array of all remaining availability structures that can possibly be selected
+function schedule(numOfLoads){
+	//looks like something in here is going past the end of the timeSlots array - once start=24, everything breaks
+	var timeSlots = officialWasherQueue.map(function(val,ind){return ind})
+
+	function concat(a,b){return a.concat(b)}
+
+	return timeSlots.map(function(val){return findAvailability(numOfLoads,val)}).reduce(concat)
+}
+
+//returns an array of availability structures, based on whether user specified start or end time
 function findAvailability(numOfLoads,time,startOrEnd){
+	var time = time || 0
 
 	if(startOrEnd==='end'){
 		return findDropoffTimes(numOfLoads,time)
 	} else {
 		var earliestTime = findPickupTimeForMultipleLoads(numOfLoads,time)
 
-		var times = officialDryerQueue.slice(earliestTime-1).map(function(val,ind){
-			//find pickup times for each possible starting time, and create availabilities if found
+		//if earliestTime is null, there are no times available; return an empty array.
+		if(earliestTime===null) return []
+
+		var availabilities = officialDryerQueue.slice(earliestTime-1).map(function(val,ind){
+			//find pickup availabilities for each possible starting time, and create availabilities if found
 			return new Availability(time,ind+earliestTime) //add one to account for end-of-hour vs. start-of-hour
 		})
 
 		//return array of availabilities
-		return times
+		return availabilities
 		
 	}
 
-	//user could specify either start time or end time
-		//could just find all available times and filter by start > current hour, or something similar
-
-	//could get an array of availabilities and slice based on numOfLoads
-		//if numOfLoads = 4; avails.slice(4-1) since we assume the previous three spots will all be used
-
-	//return array of new Availability()
-	//when availability is accepted, add to washer and dryer queue
+	//when availability is accepted, add to washer and dryer queue - at bottom of page
 }
 
-//return boolean on whether time is booked
-function checkTime(time){
-
-	//return true/false
-}
-
-//might not actually need these functions
-function checkDryer(time){
-	//do I need these parentheses?
-	return (!!dryers[time] && !!dryers[time+1])
-}
-
-function useDryer(time){
-	dryers[time]--
-	dryers[time+1]--
-}
-
-function useWasher(time){
-	washers[time]--
-}
-
-//might not need this storage
-var washers = {}
-var dryers = {}
-
-for(var i = 0; i <=23; i++){
-	washers[i] = 10
-	dryers[i] = 7
-}
-
-dryers[24] = dryers[25] = 7
-
-//these times represent the beginning of the hour; need to account for that when telling people about pickup times.
-//when washer is occupied, decrement property
-//when dryer is occupied, decrement property + next property
-
-/*
-general thoughts:
-maybe we should have a queue of loads, and only start loads when needed:
-	e.g., if someone drops off laundry at 0 and picks it up at 5, we can start it at 0, 1, or 2
-	we can also wash it at 0 and dry it at 2, depending on what people need
-	should i have a user dashboard, and an owner dashboard to illustrate this?
-
-
-var queue = [] //array of arrays corresponding to pickup times - we will check the queue to see whether a time is available
-//whenever a washer or dryer is empty, take next item from the queue; if the next item is empty, take items from queue for the hour after that, etc.
-
-*/
+//return boolean - true if time is available, false if it is not
+// function checkTime(time){
+// 	return checkWasherTime(start,officialWasherQueue) && checkDryerTime(start+1,officialDryerQueue)
+// }
 
 function checkWasherTime(start,washerQueue){
 	return washerQueue[start].length < 7
@@ -92,22 +55,22 @@ function checkDryerTime(start,dryerQueue){
 function findPickupTime(start,washerQueue,dryerQueue){
 
 	//if that time is fully occupied, check next possible time
-	while(!checkWasherTime(start,washerQueue) && start<washerQueue.length) {
+	while(!checkWasherTime(start,washerQueue) && start<washerQueue.length-1) {
 		start++
 	}
 
 	//if no times available, return null
-	if(!(start<washerQueue.length)) return null
+	if(!washerQueue[start]) return null
 	
 	//update temp queue
 	washerQueue[start].push(1)
 	start++
 
-	while(!checkDryerTime(start,dryerQueue) && start<dryerQueue.length) {
+	while(!checkDryerTime(start,dryerQueue) && start<dryerQueue.length-2) {
 		start++
 	}
 	
-	if(!(start<dryerQueue.length)) return null
+	if(!dryerQueue[start+1]) return null
 	
 	//dryer is now occupied for two hours
 	dryerQueue[start].push(1)
@@ -147,7 +110,7 @@ function reset(){
 	officialDryerQueue = Array.apply(null,Array(26)).map(function(){return []})
 }
 
-//should this just be an array of counts, rather than of arrays?
+//these could be arrays of counters right now, but this is an array of arrays so that in future, we can store entire objects with ID info in the queue.
 var officialWasherQueue = Array.apply(null,Array(24)).map(function(){return []})
 var officialDryerQueue = Array.apply(null,Array(26)).map(function(){return []})
 
@@ -204,3 +167,11 @@ function acceptAvailability(availability){
 
 	officialWasherQueue[queuePosition].push(1)
 }
+
+//create array of availabilities here, so we can start testing
+for(var i = 0; i < 19; i++){
+	for(var j = 0; j < 7; j++){
+		acceptAvailability(new Availability(i,i+5))
+	}
+}
+console.log(schedule(1))
