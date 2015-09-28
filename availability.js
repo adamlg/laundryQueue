@@ -127,19 +127,33 @@ angular.module('laundryQueue',[])
 		//move on to dryer calculation
 		start++
 
+		// //the rest of this is basically the same as above, except adjusted for the dryers' two-hour run time.
+		// while(!checkDryerTime(start,dryerQueue) && start<dryerQueue.length-2) {
+		// 	start++
+		// }
+
+		var dryerHoursFound = []
+		if(start===23){
+			var test = true
+		}
 		//the rest of this is basically the same as above, except adjusted for the dryers' two-hour run time.
-		while(!checkDryerTime(start,dryerQueue) && start<dryerQueue.length-2) {
+		while(dryerHoursFound.length < 2 && start<dryerQueue.length) {
+			if(dryerQueue[start].length < 10) dryerHoursFound.push(start)
 			start++
 		}
 		
-		if(!dryerQueue[start+1] || !checkDryerTime(start,dryerQueue)) return null
+		if(dryerHoursFound.length < 2) return null
+		// if(!dryerQueue[start+1] || !checkDryerTime(start,dryerQueue)) return null
 		
 		//dryer is now occupied for two hours
-		dryerQueue[start].push(1)
-		dryerQueue[start+1].push(1)
+		// dryerQueue[start].push(1)
+		// dryerQueue[start+1].push(1)
 
-		//earliest pickup time is two hours after load is placed in dryer
-		return start+2
+		dryerQueue[dryerHoursFound[0]].push(1)
+		dryerQueue[dryerHoursFound[1]].push(1)
+
+		//earliest pickup time is one hour after load is finished in dryer
+		return dryerHoursFound[1]+1
 	}
 
 	//user specifies dropoff time and number of loads
@@ -169,6 +183,9 @@ angular.module('laundryQueue',[])
 	function findDropoffTimes(num, end){
 
 		var times = officialWasherQueue.slice(0,end-2).map(function(val,ind){
+			if(ind===23){
+				var test = true
+			}
 			//find pickup times for each possible starting time, and create availabilities if found
 			return (findPickupTimeForMultipleLoads(num, ind) !== null && findPickupTimeForMultipleLoads(num, ind) <= end) ? new Availability(ind,end) : null
 		})
@@ -183,21 +200,21 @@ angular.module('laundryQueue',[])
 	}
 
 	function acceptAvailability(availability){
-		//endHour is when customer can pick up clothes; latest possible queue position is two hours earlier, since the dryers take two hours.
-		var queuePosition = availability.endHour - 2
+		//endHour is when customer can pick up clothes; we start at queue position one hour before instead of two, since we have to traverse our dryer queue and see how we can shift dryer usage.
+		var queuePosition = availability.endHour - 1
 
-		//when item is added to washer or dryer queue, if that spot in queue already has 7/10 items, move to earlier spot
-		while(officialDryerQueue[queuePosition].length === 10 || officialDryerQueue[queuePosition+1].length === 10){
+		//when item is added to washer or dryer queue, if that spot in queue already has 7/10 items, move to earlier spot.
+		var dryerHours = []
+		while(dryerHours.length < 2){
+			if(officialDryerQueue[queuePosition].length < 10) dryerHours.push(queuePosition)
 			queuePosition--
 		}
 
-		//update two hours in the official queue.
-		officialDryerQueue[queuePosition].push(1)
-		officialDryerQueue[queuePosition+1].push(1)
+		//update the two dryer hours in the official queue.
+		officialDryerQueue[dryerHours[0]].push(1)
+		officialDryerQueue[dryerHours[1]].push(1)
 
-		//now on to the washer queue, which must at latest start one hour before entering the dryer.
-		queuePosition--
-
+		//the washer queue is searched differently, since washers only take one hour and don't require usage shifting.
 		while(officialWasherQueue[queuePosition].length === 7){
 			queuePosition--
 		}
@@ -217,10 +234,11 @@ angular.module('laundryQueue',[])
 		$scope.initialize()
 		$scope.endTimes = findAvailability(1, 0)
 		$scope.startTimes = findAvailability(1, 26, 'end')
+		// console.log(officialWasherQueue)
+		// console.log(officialDryerQueue)
 	}
 
 })
-
 
 //create array of availabilities here, so we can start testing
 // for(var i = 0; i < 19; i++){
