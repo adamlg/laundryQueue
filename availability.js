@@ -134,6 +134,7 @@ angular.module('laundryQueue',[])
 			start++
 		}
 		
+		//if we couldn't find a second dryerHour, return null.
 		if(dryerHoursFound.length < 2) return null
 		
 		//dryer is now occupied for two hours
@@ -191,6 +192,7 @@ angular.module('laundryQueue',[])
 		//when item is added to washer or dryer queue, if that spot in queue already has 7/10 items, move to earlier spot.
 		var dryerHours = []
 		while(dryerHours.length < 2 && queuePosition > 0){
+			//need space in the queue, and the proper timing between dryerHours; it doesn't make sense to have 3 and 5 as dryer hours, since that would be a total of 3 hours of drying time and the time slot shift wouldn't work properly.
 			if(officialDryerQueue[queuePosition].length < 10 && (dryerHours[0] ? ((queuePosition - dryerHours[0])%2 === -1) : true) ) { dryerHours.push(queuePosition) }
 			queuePosition--
 		}
@@ -219,16 +221,10 @@ angular.module('laundryQueue',[])
 		$scope.initialize()
 		$scope.endTimes = findAvailability(1, 0)
 		$scope.startTimes = findAvailability(1, 26, 'end')
+
+		//I recommend un-commenting these if you want to see what exactly is being stored.
 		// console.log(officialWasherQueue)
 		// console.log(officialDryerQueue)
 	}
 
 })
-
-//create array of availabilities here, so we can start testing
-// for(var i = 0; i < 19; i++){
-// 	for(var j = 0; j < 7; j++){
-// 		acceptAvailability(new Availability(i,i+5))
-// 	}
-// }
-// console.log(schedule(1))
