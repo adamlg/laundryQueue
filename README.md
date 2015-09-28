@@ -15,5 +15,4 @@ Users can select drop-off times or pick-up times and see what's available; there
 
 ## Testing
 
-
-
+A maximum of 120 loads of laundry can be done in a single day; any combination of loads of laundry that add up to 120 should enter the queue without any errors.  After 120 items are in the queue, there should not be any more times displayed.

@@ -127,28 +127,16 @@ angular.module('laundryQueue',[])
 		//move on to dryer calculation
 		start++
 
-		// //the rest of this is basically the same as above, except adjusted for the dryers' two-hour run time.
-		// while(!checkDryerTime(start,dryerQueue) && start<dryerQueue.length-2) {
-		// 	start++
-		// }
-
-		var dryerHoursFound = []
-		if(start===23){
-			var test = true
-		}
 		//the rest of this is basically the same as above, except adjusted for the dryers' two-hour run time.
+		var dryerHoursFound = []
 		while(dryerHoursFound.length < 2 && start<dryerQueue.length) {
 			if(dryerQueue[start].length < 10) dryerHoursFound.push(start)
 			start++
 		}
 		
 		if(dryerHoursFound.length < 2) return null
-		// if(!dryerQueue[start+1] || !checkDryerTime(start,dryerQueue)) return null
 		
 		//dryer is now occupied for two hours
-		// dryerQueue[start].push(1)
-		// dryerQueue[start+1].push(1)
-
 		dryerQueue[dryerHoursFound[0]].push(1)
 		dryerQueue[dryerHoursFound[1]].push(1)
 
@@ -183,9 +171,6 @@ angular.module('laundryQueue',[])
 	function findDropoffTimes(num, end){
 
 		var times = officialWasherQueue.slice(0,end-2).map(function(val,ind){
-			if(ind===23){
-				var test = true
-			}
 			//find pickup times for each possible starting time, and create availabilities if found
 			return (findPickupTimeForMultipleLoads(num, ind) !== null && findPickupTimeForMultipleLoads(num, ind) <= end) ? new Availability(ind,end) : null
 		})
@@ -205,8 +190,8 @@ angular.module('laundryQueue',[])
 
 		//when item is added to washer or dryer queue, if that spot in queue already has 7/10 items, move to earlier spot.
 		var dryerHours = []
-		while(dryerHours.length < 2){
-			if(officialDryerQueue[queuePosition].length < 10) dryerHours.push(queuePosition)
+		while(dryerHours.length < 2 && queuePosition > 0){
+			if(officialDryerQueue[queuePosition].length < 10 && (dryerHours[0] ? ((queuePosition - dryerHours[0])%2 === -1) : true) ) { dryerHours.push(queuePosition) }
 			queuePosition--
 		}
 
@@ -215,7 +200,7 @@ angular.module('laundryQueue',[])
 		officialDryerQueue[dryerHours[1]].push(1)
 
 		//the washer queue is searched differently, since washers only take one hour and don't require usage shifting.
-		while(officialWasherQueue[queuePosition].length === 7){
+		while(officialWasherQueue[queuePosition].length === 7 && queuePosition > -1){
 			queuePosition--
 		}
 
