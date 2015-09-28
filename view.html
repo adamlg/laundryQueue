@@ -1,1 +1,36 @@
+<script src="bower_components/angular/angular.js"></script>
 <script src="availability.js"></script>
+<link rel="stylesheet" type="text/css" href="styles.css">
+
+<html ng-app="laundryQueue">
+
+	<div ng-controller="mainCtrl">
+		<input placeholder="Enter number of loads of laundry here." style="width:250px" ng-model="numOfLoads"></input>
+		<div style="height:40px; margin-top:10px">
+			<div ng-hide="startTimes.length || endTimes.length">Sorry, there aren't times available for that much laundry.</div>
+			<div ng-show="selectedStart===null && selectedEnd===null && (startTimes.length || endTimes.length)">Click a start or end time to see what's available.</div>
+			<div ng-hide="(selectedStart===null && selectedEnd===null) || !(startTimes.length || endTimes.length)">Click a selected time to de-select it.</div>
+			<button ng-click="initialize()" ng-hide="(selectedStart === null && selectedEnd === null) || !(startTimes.length || endTimes.length)">Clear selections</button>
+			<button ng-click="acceptMultipleAvailabilities()" ng-hide="selectedStart === null || selectedEnd === null">Accept selected times</button>
+		</div>
+		<div>
+			<div style="display:inline-block; height:950px; vertical-align:top">
+				<div ng-hide="!startTimes.length && !endTimes.length">Drop-off time:</div>
+				<div class="hour" ng-repeat="time in startTimes" ng-click="setStart(time.startHour)" ng-class="{selected:selectedStart === time.startHour}">
+					<span class="hourText">
+						{{(time.startHour%12 || 12) + ':00' + (time.startHour<12 ? ' A.M.' : ' P.M.')}}
+					</span>
+				</div>
+			</div>
+			<div style="display:inline-block; height:950px; vertical-align:top">
+				<div ng-hide="!startTimes.length && !endTimes.length">Pick-up time:</div>
+				<div class="hour" ng-repeat="time in endTimes" ng-click="setEnd(time.endHour)" ng-class="{selected:selectedEnd === time.endHour}">
+					<span class="hourText">
+						{{(time.endHour%12 || 12) + ':00' + ((time.endHour<12 || time.endHour>23) ? ' A.M.' : ' P.M.')}}
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</html>

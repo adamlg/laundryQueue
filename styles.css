@@ -1,0 +1,21 @@
+.hour {
+	border-style:solid;
+	border-color:black;
+	border-width:2px;
+	padding:3px;
+	margin:3px;
+	width:80px;
+	height:25px;
+	text-align:center;
+	position:relative;
+}
+
+.hourText {
+	position:relative;
+	top:4px;
+	height:100%;
+}
+
+.selected {
+	background-color:green;
+}
