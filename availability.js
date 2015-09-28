@@ -106,6 +106,7 @@ angular.module('laundryQueue',[])
 	}
 
 	//checks whether dryer time is available.
+	//this function is not used anymore, since it does not account for time shifting
 	function checkDryerTime(start,dryerQueue){
 		return (dryerQueue[start].length < 10) && (dryerQueue[start+1].length < 10)
 	}
